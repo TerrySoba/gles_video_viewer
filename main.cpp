@@ -1,27 +1,46 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #define GLFW_INCLUDE_ES3
 #include <GLFW/glfw3.h>
 
-static const GLuint WIDTH = 800;
-static const GLuint HEIGHT = 600;
-static const GLchar* vertex_shader_source =
-    "#version 100\n"
-    "attribute vec3 position;\n"
-    "void main() {\n"
-    "   gl_Position = vec4(position, 1.0);\n"
-    "}\n";
-static const GLchar* fragment_shader_source =
-    "#version 100\n"
-    "void main() {\n"
-    "   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
-    "}\n";
+#include <string>
+#include <cstdio>
+#include <cstdlib>
+#include <cerrno>
+
+static const GLuint WIDTH = 1920;
+static const GLuint HEIGHT = 1080;
+//static const GLchar* vertex_shader_source =
+//    "#version 300 es\n"
+//    "in vec3 position;\n"
+//    "void main() {\n"
+//    "   gl_Position = vec4(position, 1.0);\n"
+//    "}\n";
+//static const GLchar* fragment_shader_source =
+//    "#version 300 es\n"
+//    "void main() {\n"
+//    "   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+//    "}\n";
 static const GLfloat vertices[] = {
      0.0f,  0.5f, 0.0f,
      0.5f, -0.5f, 0.0f,
     -0.5f, -0.5f, 0.0f,
 };
+
+std::string get_file_contents(const char *filename)
+{
+  std::FILE *fp = std::fopen(filename, "rb");
+  if (fp)
+  {
+    std::string contents;
+    std::fseek(fp, 0, SEEK_END);
+    contents.resize(std::ftell(fp));
+    std::rewind(fp);
+    std::fread(&contents[0], 1, contents.size(), fp);
+    std::fclose(fp);
+    return(contents);
+  }
+  throw(errno);
+}
+
 
 GLint common_get_shader_program(const char *vertex_shader_source, const char *fragment_shader_source) {
     enum Consts {INFOLOG_LEN = 512};
@@ -82,7 +101,10 @@ int main(void) {
     printf("GL_VERSION  : %s\n", glGetString(GL_VERSION) );
     printf("GL_RENDERER : %s\n", glGetString(GL_RENDERER) );
 
-    shader_program = common_get_shader_program(vertex_shader_source, fragment_shader_source);
+    std::string vertex_shader_source = get_file_contents("../gles_video_viewer/shader.vert");
+    std::string fragment_shader_source = get_file_contents("../gles_video_viewer/shader.frag");
+
+    shader_program = common_get_shader_program(vertex_shader_source.c_str(), fragment_shader_source.c_str());
     pos = glGetAttribLocation(shader_program, "position");
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
