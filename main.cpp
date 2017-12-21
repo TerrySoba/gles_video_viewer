@@ -8,17 +8,7 @@
 
 static const GLuint WIDTH = 1920;
 static const GLuint HEIGHT = 1080;
-//static const GLchar* vertex_shader_source =
-//    "#version 300 es\n"
-//    "in vec3 position;\n"
-//    "void main() {\n"
-//    "   gl_Position = vec4(position, 1.0);\n"
-//    "}\n";
-//static const GLchar* fragment_shader_source =
-//    "#version 300 es\n"
-//    "void main() {\n"
-//    "   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
-//    "}\n";
+
 static const GLfloat vertices[] = {
      0.0f,  0.5f, 0.0f,
      0.5f, -0.5f, 0.0f,
