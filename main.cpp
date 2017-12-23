@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <iostream>
-
+#include <memory>
 
 
 static const GLuint WIDTH = 1920;
@@ -44,6 +44,33 @@ std::string get_file_contents(const char *filename)
     return(contents);
   }
   throw(errno);
+}
+
+std::shared_ptr<GLuint> loadTexture(const std::string& path)
+{
+    cv::Mat mat = cv::imread(path);
+    cv::cvtColor(mat, mat, CV_RGB2BGR);
+
+    // Create one OpenGL texture
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+
+    // "Bind" the newly created texture : all future texture functions will modify this texture
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // Give the image to OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, mat.cols, mat.rows, 0, GL_RGB, GL_UNSIGNED_BYTE, mat.data);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    return std::shared_ptr<GLuint>(
+                new GLuint(textureID),
+                [](auto ptr) {
+                    glDeleteTextures(1, ptr);
+                    delete ptr;
+                }
+    );
 }
 
 
@@ -130,25 +157,25 @@ int main(void) {
     glEnableVertexAttribArray(texCoord);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    auto shadowmask = loadTexture("../gles_video_viewer/pix/subpixels.png");
+    auto texture = loadTexture("../gles_video_viewer/pix/test.png");
 
-    cv::Mat mat = cv::imread("../gles_video_viewer/pix/test.png");
-    cv::cvtColor(mat, mat, CV_RGB2BGR);
+    auto subpixelSampler = glGetUniformLocation(shader_program, "subpixelSampler");
+    auto imageSampler = glGetUniformLocation(shader_program, "imageSampler");
+
+    std::cout << "sub:" << subpixelSampler << " image:" << imageSampler << std::endl;
+
+    glUseProgram(shader_program);
+    glUniform1i(subpixelSampler, 0);
+    glUniform1i(imageSampler, 1);
+
+    glActiveTexture(GL_TEXTURE0 + 0); // Texture unit 0
+    glBindTexture(GL_TEXTURE_2D, *shadowmask);
+
+    glActiveTexture(GL_TEXTURE0 + 1); // Texture unit 1
+    glBindTexture(GL_TEXTURE_2D, *texture);
 
 
-    // Create one OpenGL texture
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-
-    // "Bind" the newly created texture : all future texture functions will modify this texture
-    glBindTexture(GL_TEXTURE_2D, textureID);
-
-    // Give the image to OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, mat.cols, mat.rows, 0, GL_RGB, GL_UNSIGNED_BYTE, mat.data);
-
-    std::cout << "x:" << mat.cols << " y:" << mat.rows << std::endl;
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -158,6 +185,9 @@ int main(void) {
         glfwSwapBuffers(window);
     }
     glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &texCoordBuffer);
+
     glfwTerminate();
+
     return EXIT_SUCCESS;
 }

@@ -13,6 +13,8 @@ include_directories(
 
 add_executable(${PROJECT_NAME}
     main.cpp
+    shader.frag # only added here to add file to project in IDE
+    shader.vert # only added here to add file to project in IDE
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -20,8 +22,3 @@ target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     -lGL
 )
-
-message("opencv all: " ${OpenCV_LIBS})
-foreach(cvmodule ${OpenCV_LIBS})
-    message("opencv: " ${cvmodule})
-endforeach(cvmodule)
