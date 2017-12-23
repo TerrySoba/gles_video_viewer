@@ -10,9 +10,17 @@ static const GLuint WIDTH = 1920;
 static const GLuint HEIGHT = 1080;
 
 static const GLfloat vertices[] = {
-     0.0f,  0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-    -0.5f, -0.5f, 0.0f,
+    -1.0,  1.0, 0.0,
+     1.0,  1.0, 0.0,
+    -1.0, -1.0, 0.0,
+     1.0, -1.0, 0.0,
+};
+
+static const GLfloat textureCoordinates[] = {
+     0.0,  1.0,
+     1.0,  1.0,
+     0.0,  0.0,
+     1.0,  0.0,
 };
 
 std::string get_file_contents(const char *filename)
@@ -77,8 +85,6 @@ GLint common_get_shader_program(const char *vertex_shader_source, const char *fr
 }
 
 int main(void) {
-    GLuint shader_program, vbo;
-    GLint pos;
     GLFWwindow* window;
 
     glfwInit();
@@ -94,12 +100,14 @@ int main(void) {
     std::string vertex_shader_source = get_file_contents("../gles_video_viewer/shader.vert");
     std::string fragment_shader_source = get_file_contents("../gles_video_viewer/shader.frag");
 
-    shader_program = common_get_shader_program(vertex_shader_source.c_str(), fragment_shader_source.c_str());
-    pos = glGetAttribLocation(shader_program, "position");
+    auto shader_program = common_get_shader_program(vertex_shader_source.c_str(), fragment_shader_source.c_str());
+    auto pos = glGetAttribLocation(shader_program, "position");
+    auto texCoord = glGetAttribLocation(shader_program, "textureCoord");
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glViewport(0, 0, WIDTH, HEIGHT);
 
+    GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -107,11 +115,20 @@ int main(void) {
     glEnableVertexAttribArray(pos);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    GLuint texCoordBuffer;
+    glGenBuffers(1, &texCoordBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(textureCoordinates), textureCoordinates, GL_STATIC_DRAW);
+    glVertexAttribPointer(texCoord, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+    glEnableVertexAttribArray(texCoord);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shader_program);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glfwSwapBuffers(window);
     }
     glDeleteBuffers(1, &vbo);
