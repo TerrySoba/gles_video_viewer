@@ -1,10 +1,17 @@
 #define GLFW_INCLUDE_ES3
 #include <GLFW/glfw3.h>
 
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+
 #include <string>
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
+#include <iostream>
+
+
 
 static const GLuint WIDTH = 1920;
 static const GLuint HEIGHT = 1080;
@@ -17,10 +24,10 @@ static const GLfloat vertices[] = {
 };
 
 static const GLfloat textureCoordinates[] = {
-     0.0,  1.0,
-     1.0,  1.0,
      0.0,  0.0,
      1.0,  0.0,
+     0.0,  1.0,
+     1.0,  1.0,
 };
 
 std::string get_file_contents(const char *filename)
@@ -123,6 +130,25 @@ int main(void) {
     glEnableVertexAttribArray(texCoord);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+
+    cv::Mat mat = cv::imread("../gles_video_viewer/pix/test.png");
+    cv::cvtColor(mat, mat, CV_RGB2BGR);
+
+
+    // Create one OpenGL texture
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+
+    // "Bind" the newly created texture : all future texture functions will modify this texture
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // Give the image to OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, mat.cols, mat.rows, 0, GL_RGB, GL_UNSIGNED_BYTE, mat.data);
+
+    std::cout << "x:" << mat.cols << " y:" << mat.rows << std::endl;
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
