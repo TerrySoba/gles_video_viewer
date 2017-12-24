@@ -6,8 +6,6 @@ uniform sampler2D imageSampler;
 uniform sampler2D subpixelSampler;
 
 void main() {
-   // color = vec4(texCoord.r, texCoord.g, 1.0, 1.0);
    color = vec4(texture( subpixelSampler, vec2(texCoord.x * 100.0,  texCoord.y * 100.0) ).rgb, 1.0) *
            vec4(texture( imageSampler, vec2(texCoord.x,  texCoord.y) ).rgb, 1.0);
-   color *= 0.5;
 }

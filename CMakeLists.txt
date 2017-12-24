@@ -13,6 +13,8 @@ include_directories(
 
 add_executable(${PROJECT_NAME}
     main.cpp
+    gl_handler.cpp
+    gl_handler.h
     shader.frag # only added here to add file to project in IDE
     shader.vert # only added here to add file to project in IDE
 )
