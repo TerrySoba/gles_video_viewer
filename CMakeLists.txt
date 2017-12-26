@@ -19,6 +19,8 @@ add_executable(${PROJECT_NAME}
     shader.vert # only added here to add file to project in IDE
     passthrough.frag # only added here to add file to project in IDE
     passthrough.vert # only added here to add file to project in IDE
+    blur.frag # only added here to add file to project in IDE
+    blur.vert # only added here to add file to project in IDE
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -109,6 +109,10 @@ int main(void) {
                     "../gles_video_viewer/passthrough.vert",
                     "../gles_video_viewer/passthrough.frag");
 
+        auto blurProgram = gl.compileAndLinkShaderFiles(
+                    "../gles_video_viewer/blur.vert",
+                    "../gles_video_viewer/blur.frag");
+
         auto pos = 0;
         auto texCoord = 1;
 
@@ -154,7 +158,7 @@ int main(void) {
 
 
             // now render to screen
-            glUseProgram(*passthroughProgram);
+            glUseProgram(*blurProgram);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glViewport(0, 0, WIDTH, HEIGHT);
 
