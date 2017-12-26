@@ -92,10 +92,9 @@ std::shared_ptr<GLuint> GlHandler::compileAndLinkShaders(const std::string& vert
     });
 }
 
-std::shared_ptr<GLuint> GlHandler::loadTexture(const std::string& path)
+std::shared_ptr<GLuint> GlHandler::loadTexture(const cv::Mat& mat)
 {
-    cv::Mat mat = cv::imread(path);
-    cv::cvtColor(mat, mat, CV_RGB2BGR);
+    // cv::cvtColor(mat, mat, CV_RGB2BGR);
 
     // Create one OpenGL texture
     GLuint textureID;
@@ -117,6 +116,12 @@ std::shared_ptr<GLuint> GlHandler::loadTexture(const std::string& path)
                     delete ptr;
                 }
     );
+}
+
+std::shared_ptr<GLuint> GlHandler::loadTexture(const std::string& path)
+{
+    cv::Mat mat = cv::imread(path);
+    return loadTexture(mat);
 }
 
 std::shared_ptr<GLuint> GlHandler::createVertexBufferObject(const void* data, std::size_t dataSize, std::size_t vectorSize, GLuint index)

@@ -5,7 +5,7 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
+#include <opencv2/opencv.hpp>
 
 #include <string>
 #include <cstdio>
@@ -17,8 +17,8 @@
 
 
 
-static const GLuint WIDTH = 1920;
-static const GLuint HEIGHT = 1080;
+static const GLuint WIDTH = 1920 * 2;
+static const GLuint HEIGHT = 1080 * 2;
 
 static const GLfloat vertices[] = {
     -1.0,  1.0, 0.0,
@@ -38,6 +38,16 @@ static const GLfloat textureCoordinates[] = {
 int main(void) {
     try
     {
+        // cv::VideoCapture capture("/home/yoshi252/Downloads/VID_20170629_221511.avi");
+        // cv::VideoCapture capture("/home/yoshi252/Downloads/5_Exceed_-_Heaven7_(Win32).avi");
+        cv::VideoCapture capture(0);
+
+        capture.set(CV_CAP_PROP_FRAME_WIDTH,1920);
+        capture.set(CV_CAP_PROP_FRAME_HEIGHT,1080);
+
+        cv::Mat image;
+        capture >> image;
+
         GlHandler gl(WIDTH, HEIGHT, __FILE__);
 
         GLFWwindow* window;
@@ -66,7 +76,8 @@ int main(void) {
         auto texCoordBuffer = gl.createVertexBufferObject(textureCoordinates, sizeof(textureCoordinates), 2, texCoord);
 
         auto shadowmask = gl.loadTexture("../gles_video_viewer/pix/subpixels.png");
-        auto texture = gl.loadTexture("../gles_video_viewer/pix/test.png");
+        // auto texture = gl.loadTexture("../gles_video_viewer/pix/test.png");
+        auto texture = gl.loadTexture(image);
 
         auto subpixelSampler = 0;
         auto imageSampler = 1;
@@ -88,6 +99,12 @@ int main(void) {
             glUseProgram(*shaderProgram);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             glfwSwapBuffers(window);
+
+            capture >> image;
+            texture = gl.loadTexture(image);
+
+            glActiveTexture(GL_TEXTURE0 + 1); // Texture unit 1
+            glBindTexture(GL_TEXTURE_2D, *texture);
         }
 
         glfwTerminate();
