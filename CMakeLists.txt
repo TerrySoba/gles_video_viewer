@@ -17,6 +17,8 @@ add_executable(${PROJECT_NAME}
     gl_handler.h
     shader.frag # only added here to add file to project in IDE
     shader.vert # only added here to add file to project in IDE
+    passthrough.frag # only added here to add file to project in IDE
+    passthrough.vert # only added here to add file to project in IDE
 )
 
 target_link_libraries(${PROJECT_NAME}
