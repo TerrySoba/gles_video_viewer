@@ -1,6 +1,6 @@
 #version 320 es
-in highp vec3 position;
-in highp vec2 textureCoord;
+in layout(location = 0) highp vec3 position;
+in layout(location = 1) highp vec2 textureCoord;
 
 out highp vec2 texCoord;
 

@@ -56,8 +56,8 @@ int main(void) {
                     "../gles_video_viewer/shader.vert",
                     "../gles_video_viewer/shader.frag");
 
-        auto pos = glGetAttribLocation(*shaderProgram, "position");
-        auto texCoord = glGetAttribLocation(*shaderProgram, "textureCoord");
+        auto pos = 0;
+        auto texCoord = 1;
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glViewport(0, 0, WIDTH, HEIGHT);
@@ -68,10 +68,8 @@ int main(void) {
         auto shadowmask = gl.loadTexture("../gles_video_viewer/pix/subpixels.png");
         auto texture = gl.loadTexture("../gles_video_viewer/pix/test.png");
 
-        auto subpixelSampler = glGetUniformLocation(*shaderProgram, "subpixelSampler");
-        auto imageSampler = glGetUniformLocation(*shaderProgram, "imageSampler");
-
-        std::cout << "sub:" << subpixelSampler << " image:" << imageSampler << std::endl;
+        auto subpixelSampler = 0;
+        auto imageSampler = 1;
 
         glUseProgram(*shaderProgram);
         glUniform1i(subpixelSampler, 0);
