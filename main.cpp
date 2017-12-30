@@ -13,15 +13,15 @@
 #include <cerrno>
 #include <iostream>
 #include <memory>
-
+#include <chrono>
 
 
 
 static const GLuint WIDTH = 1920 * 2;
 static const GLuint HEIGHT = 1080 * 2;
 
-static const GLuint RENDER_WIDTH = WIDTH * 3;
-static const GLuint RENDER_HEIGHT = HEIGHT * 3;
+static const GLuint RENDER_WIDTH = WIDTH * 1.0;
+static const GLuint RENDER_HEIGHT = HEIGHT * 1.0;
 
 static const GLfloat vertices[] = {
     -1.0,  1.0, 0.0,
@@ -37,18 +37,31 @@ static const GLfloat textureCoordinates[] = {
      1.0,  1.0,
 };
 
+cv::Mat getField(const cv::Mat& mat, int field)
+{
+    cv::Mat frame(mat.rows / 2, mat.cols, mat.type());
+
+    for (int y = field; y < mat.rows; y += 2)
+    {
+        mat.row(y).copyTo(frame.row(y / 2));
+    }
+
+    return frame;
+}
+
+
 
 int main(void) {
     try
     {
         // cv::VideoCapture capture("/home/yoshi252/Downloads/VID_20170629_221511.avi");
-        // cv::VideoCapture capture("/home/yoshi252/Downloads/5_Exceed_-_Heaven7_(Win32).avi");
-        cv::VideoCapture capture(0);
+        cv::VideoCapture capture("../gles_video_viewer/pix/mario_world_cap.avi");
+        // cv::VideoCapture capture(1);
 
-        capture.set(CV_CAP_PROP_FRAME_WIDTH,1920);
-        capture.set(CV_CAP_PROP_FRAME_HEIGHT,1080);
+        // capture.set(CV_CAP_PROP_FRAME_WIDTH,480);
+        // capture.set(CV_CAP_PROP_FRAME_HEIGHT,240);
 
-        cv::Mat image;
+        cv::Mat image = cv::imread("../gles_video_viewer/pix/test2.png");
         capture >> image;
 
         GlHandler gl(WIDTH, HEIGHT, __FILE__);
@@ -138,7 +151,11 @@ int main(void) {
 
 
         glfwSwapInterval(1); // enable vsync
+
+        size_t frameCounter = 0;
+        auto startTime = std::chrono::high_resolution_clock::now();
         while (!glfwWindowShouldClose(window)) {
+
             glfwPollEvents();
 
             // Render to our framebuffer
@@ -158,6 +175,7 @@ int main(void) {
 
 
             // now render to screen
+            // glUseProgram(*passthroughProgram);
             glUseProgram(*blurProgram);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glViewport(0, 0, WIDTH, HEIGHT);
@@ -168,9 +186,25 @@ int main(void) {
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
             glfwSwapBuffers(window);
+            ++frameCounter;
 
-            capture >> image;
-            texture = gl.loadTexture(image);
+            // output fps
+            if (frameCounter == 300)
+            {
+
+                auto end = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double> diff = end-startTime;
+                std::cout << "fps: " << ((double)frameCounter / diff.count()) << "\n";
+                startTime = std::chrono::high_resolution_clock::now();
+                frameCounter = 0;
+            }
+
+            int field = frameCounter & 1;
+
+            if (field)
+                capture >> image;
+
+            texture = gl.loadTexture(getField(image, field));
 
             glActiveTexture(GL_TEXTURE0 + 1); // Texture unit 1
             glBindTexture(GL_TEXTURE_2D, *texture);

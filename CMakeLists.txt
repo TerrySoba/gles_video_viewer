@@ -26,5 +26,13 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     ${GLFW_LIBRARIES}
     ${OpenCV_LIBS}
-    -lGL
+    GL
+    dl
+    pthread
+    X11
+    Xrandr
+    Xinerama
+    Xxf86vm
+    Xcursor
 )
+
