@@ -92,9 +92,16 @@ std::shared_ptr<GLuint> GlHandler::compileAndLinkShaders(const std::string& vert
     });
 }
 
-std::shared_ptr<GLuint> GlHandler::loadTexture(const cv::Mat& mat)
+std::shared_ptr<GLuint> GlHandler::loadTexture(const cv::Mat& matIn)
 {
     // cv::cvtColor(mat, mat, CV_RGB2BGR);
+
+    cv::Mat mat = matIn;
+
+    if (mat.channels() == 1)
+    {
+        cv::cvtColor(mat, mat, CV_GRAY2BGR);
+    }
 
     // Create one OpenGL texture
     GLuint textureID;

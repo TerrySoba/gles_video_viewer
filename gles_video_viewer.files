@@ -2,3 +2,9 @@ gl_handler.cpp
 gl_handler.h
 main.cpp
 CMakeLists.txt
+shader.frag
+shader.vert
+passthrough.frag
+passthrough.vert
+blur.frag
+blur.vert

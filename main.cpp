@@ -135,31 +135,40 @@ int main(void) {
         auto vbo = gl.createVertexBufferObject(vertices, sizeof(vertices), 3, pos);
         auto texCoordBuffer = gl.createVertexBufferObject(textureCoordinates, sizeof(textureCoordinates), 2, texCoord);
 
-        auto shadowmask = gl.loadTexture("../gles_video_viewer/pix/subpixels.png");
+        // auto shadowmask = gl.loadTexture("../gles_video_viewer/pix/subpixels.png");
+        auto shadowmask = gl.loadTexture("../gles_video_viewer/pix/subpixles_4k.png");
+        auto scanline = gl.loadTexture("../gles_video_viewer/pix/scanline_mono.png");
         // auto texture = gl.loadTexture("../gles_video_viewer/pix/test.png");
         auto texture = gl.loadTexture(image);
 
         auto subpixelSampler = 0;
         auto imageSampler = 1;
+        auto scanlineSampler = 2;
+        auto inputRes = 3;
 
         glUseProgram(*crtProgram);
         glUniform1i(subpixelSampler, 0);
         glUniform1i(imageSampler, 1);
-
-
-
+        glUniform1i(scanlineSampler, 2);
 
 
         glfwSwapInterval(1); // enable vsync
 
         size_t frameCounter = 0;
         auto startTime = std::chrono::high_resolution_clock::now();
+
+
+        int inputX = 320;
+        int inputY = 240;
+
         while (!glfwWindowShouldClose(window)) {
 
             glfwPollEvents();
 
             // Render to our framebuffer
             glUseProgram(*crtProgram);
+            glUniform2i(inputRes, inputX, inputY);
+
             glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
             glViewport(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
 
@@ -171,12 +180,15 @@ int main(void) {
             glActiveTexture(GL_TEXTURE0 + 1); // Texture unit 1
             glBindTexture(GL_TEXTURE_2D, *texture);
 
+            glActiveTexture(GL_TEXTURE0 + 2); // Texture unit 2
+            glBindTexture(GL_TEXTURE_2D, *scanline);
+
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 
             // now render to screen
-            // glUseProgram(*passthroughProgram);
-            glUseProgram(*blurProgram);
+            glUseProgram(*passthroughProgram);
+            // glUseProgram(*blurProgram);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glViewport(0, 0, WIDTH, HEIGHT);
 
@@ -204,7 +216,11 @@ int main(void) {
             if (field)
                 capture >> image;
 
-            texture = gl.loadTexture(getField(image, field));
+            auto fieldImage = getField(image, field);
+            texture = gl.loadTexture(fieldImage);
+
+            inputX = fieldImage.cols;
+            inputY = fieldImage.rows;
 
             glActiveTexture(GL_TEXTURE0 + 1); // Texture unit 1
             glBindTexture(GL_TEXTURE_2D, *texture);
